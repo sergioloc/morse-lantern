@@ -1,50 +1,51 @@
 package com.slc.morse.data
 
-import com.slc.morse.domain.entities.Signal
+import com.slc.morse.domain.entities.Symbol
+import com.slc.morse.domain.entities.Character
 
 class Dictionary {
 
     companion object {
         val letters = mapOf(
-            "a" to listOf(Signal.DOT, Signal.LINE),
-            "b" to listOf(Signal.LINE, Signal.DOT, Signal.DOT, Signal.DOT),
-            "c" to listOf(Signal.LINE, Signal.DOT, Signal.LINE, Signal.DOT),
-            "d" to listOf(Signal.LINE, Signal.DOT, Signal.DOT),
-            "e" to listOf(Signal.DOT),
-            "f" to listOf(Signal.DOT, Signal.DOT, Signal.LINE, Signal.DOT),
-            "g" to listOf(Signal.LINE, Signal.LINE, Signal.DOT),
-            "h" to listOf(Signal.DOT, Signal.DOT, Signal.DOT, Signal.DOT),
-            "i" to listOf(Signal.DOT, Signal.DOT),
-            "j" to listOf(Signal.DOT, Signal.LINE, Signal.LINE, Signal.LINE),
-            "k" to listOf(Signal.LINE, Signal.DOT, Signal.LINE),
-            "l" to listOf(Signal.DOT, Signal.LINE, Signal.DOT, Signal.DOT),
-            "m" to listOf(Signal.LINE, Signal.LINE),
-            "n" to listOf(Signal.LINE, Signal.DOT),
-            "o" to listOf(Signal.LINE, Signal.LINE, Signal.LINE),
-            "p" to listOf(Signal.DOT, Signal.LINE, Signal.LINE, Signal.DOT),
-            "q" to listOf(Signal.LINE, Signal.LINE, Signal.DOT, Signal.LINE),
-            "r" to listOf(Signal.DOT, Signal.LINE, Signal.DOT),
-            "s" to listOf(Signal.DOT, Signal.DOT, Signal.DOT),
-            "t" to listOf(Signal.LINE),
-            "u" to listOf(Signal.DOT, Signal.DOT, Signal.LINE),
-            "v" to listOf(Signal.DOT, Signal.DOT, Signal.DOT, Signal.LINE),
-            "w" to listOf(Signal.DOT, Signal.LINE, Signal.LINE),
-            "x" to listOf(Signal.LINE, Signal.DOT, Signal.DOT, Signal.LINE),
-            "y" to listOf(Signal.LINE, Signal.DOT, Signal.LINE, Signal.LINE),
-            "z" to listOf(Signal.LINE, Signal.LINE, Signal.DOT, Signal.DOT),
+            "a" to Character("• ─", listOf(Symbol.DOT, Symbol.LINE)),
+            "b" to Character("─ • • •", listOf(Symbol.LINE, Symbol.DOT, Symbol.DOT, Symbol.DOT)),
+            "c" to Character("─ • ─ •", listOf(Symbol.LINE, Symbol.DOT, Symbol.LINE, Symbol.DOT)),
+            "d" to Character("─ • •", listOf(Symbol.LINE, Symbol.DOT, Symbol.DOT)),
+            "e" to Character("•", listOf(Symbol.DOT)),
+            "f" to Character("• • ─ •", listOf(Symbol.DOT, Symbol.DOT, Symbol.LINE, Symbol.DOT)),
+            "g" to Character("─ ─ •", listOf(Symbol.LINE, Symbol.LINE, Symbol.DOT)),
+            "h" to Character("• • • •", listOf(Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.DOT)),
+            "i" to Character("• •", listOf(Symbol.DOT, Symbol.DOT)),
+            "j" to Character("• ─ ─ ─", listOf(Symbol.DOT, Symbol.LINE, Symbol.LINE, Symbol.LINE)),
+            "k" to Character("─ • ─", listOf(Symbol.LINE, Symbol.DOT, Symbol.LINE)),
+            "l" to Character("• ─ • •", listOf(Symbol.DOT, Symbol.LINE, Symbol.DOT, Symbol.DOT)),
+            "m" to Character("─ ─", listOf(Symbol.LINE, Symbol.LINE)),
+            "n" to Character("─ •", listOf(Symbol.LINE, Symbol.DOT)),
+            "o" to Character("─ ─ ─", listOf(Symbol.LINE, Symbol.LINE, Symbol.LINE)),
+            "p" to Character("• ─ ─ •", listOf(Symbol.DOT, Symbol.LINE, Symbol.LINE, Symbol.DOT)),
+            "q" to Character("─ ─ • ─", listOf(Symbol.LINE, Symbol.LINE, Symbol.DOT, Symbol.LINE)),
+            "r" to Character("• ─ •", listOf(Symbol.DOT, Symbol.LINE, Symbol.DOT)),
+            "s" to Character("• • •", listOf(Symbol.DOT, Symbol.DOT, Symbol.DOT)),
+            "t" to Character("─", listOf(Symbol.LINE)),
+            "u" to Character("• • ─", listOf(Symbol.DOT, Symbol.DOT, Symbol.LINE)),
+            "v" to Character("• • • ─", listOf(Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.LINE)),
+            "w" to Character("• ─ ─", listOf(Symbol.DOT, Symbol.LINE, Symbol.LINE)),
+            "x" to Character("─ • • ─", listOf(Symbol.LINE, Symbol.DOT, Symbol.DOT, Symbol.LINE)),
+            "y" to Character("─ • ─ ─", listOf(Symbol.LINE, Symbol.DOT, Symbol.LINE, Symbol.LINE)),
+            "z" to Character("─ ─ • •", listOf(Symbol.LINE, Symbol.LINE, Symbol.DOT, Symbol.DOT)),
         )
 
         val numbers = mapOf(
-            "1" to listOf(Signal.DOT, Signal.LINE, Signal.LINE, Signal.LINE, Signal.LINE),
-            "2" to listOf(Signal.DOT, Signal.DOT, Signal.LINE, Signal.LINE, Signal.LINE),
-            "3" to listOf(Signal.DOT, Signal.DOT, Signal.DOT, Signal.LINE, Signal.LINE),
-            "4" to listOf(Signal.DOT, Signal.DOT, Signal.DOT, Signal.DOT, Signal.LINE),
-            "5" to listOf(Signal.DOT, Signal.DOT, Signal.DOT, Signal.DOT, Signal.DOT),
-            "6" to listOf(Signal.LINE, Signal.DOT, Signal.DOT, Signal.DOT, Signal.DOT),
-            "7" to listOf(Signal.LINE, Signal.LINE, Signal.DOT, Signal.DOT, Signal.DOT),
-            "8" to listOf(Signal.LINE, Signal.LINE, Signal.LINE, Signal.DOT, Signal.DOT),
-            "9" to listOf(Signal.LINE, Signal.LINE, Signal.LINE, Signal.LINE, Signal.DOT),
-            "0" to listOf(Signal.LINE, Signal.LINE, Signal.LINE, Signal.LINE, Signal.LINE),
+            "0" to Character("─ ─ ─ ─ ─", listOf(Symbol.LINE, Symbol.LINE, Symbol.LINE, Symbol.LINE, Symbol.LINE)),
+            "1" to Character("• ─ ─ ─ ─", listOf(Symbol.DOT, Symbol.LINE, Symbol.LINE, Symbol.LINE, Symbol.LINE)),
+            "2" to Character("• • ─ ─ ─", listOf(Symbol.DOT, Symbol.DOT, Symbol.LINE, Symbol.LINE, Symbol.LINE)),
+            "3" to Character("• • • ─ ─", listOf(Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.LINE, Symbol.LINE)),
+            "4" to Character("• • • • ─", listOf(Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.LINE)),
+            "5" to Character("• • • • •", listOf(Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.DOT)),
+            "6" to Character("─ • • • •", listOf(Symbol.LINE, Symbol.DOT, Symbol.DOT, Symbol.DOT, Symbol.DOT)),
+            "7" to Character("─ ─ • • •", listOf(Symbol.LINE, Symbol.LINE, Symbol.DOT, Symbol.DOT, Symbol.DOT)),
+            "8" to Character("─ ─ ─ • •", listOf(Symbol.LINE, Symbol.LINE, Symbol.LINE, Symbol.DOT, Symbol.DOT)),
+            "9" to Character("─ ─ ─ ─ •", listOf(Symbol.LINE, Symbol.LINE, Symbol.LINE, Symbol.LINE, Symbol.DOT)),
         )
     }
 
