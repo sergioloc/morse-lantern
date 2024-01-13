@@ -7,6 +7,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slc.morse.data.Dictionary
 import com.slc.morse.domain.entities.Character
+import com.slc.morse.domain.entities.Message
 import com.slc.morse.domain.entities.Symbol
 import com.slc.morse.utils.isLetter
 import com.slc.morse.utils.isNumber
@@ -21,9 +22,16 @@ class LanternViewModel: ViewModel() {
     private val _code = MutableLiveData<String>()
     val code: LiveData<String> = _code
 
-    fun start(text: String, cameraManager: CameraManager) {
+    private val _messages = MutableLiveData<List<Message>>(emptyList())
+    val messages: LiveData<List<Message>> get() = _messages
 
-        val cameraId = cameraManager.cameraIdList[0]
+    fun start(text: String, cameraManager: CameraManager) {
+        val newMessage = Message(text = text, isMine = true)
+        val currentMessages = _messages.value ?: emptyList()
+        val newMessages = currentMessages + newMessage
+        _messages.value = newMessages
+
+        /*val cameraId = cameraManager.cameraIdList[0]
         val characters = ArrayList<Character>()
 
         for (c: Char in text) {
@@ -64,6 +72,7 @@ class LanternViewModel: ViewModel() {
             _code.value = "";
             _lanternOn.value = false
         }
+         */
     }
 
 }

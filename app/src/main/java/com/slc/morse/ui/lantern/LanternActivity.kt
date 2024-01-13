@@ -1,14 +1,15 @@
 package com.slc.morse.ui.lantern
 
 import android.content.Context
+import android.graphics.drawable.shapes.Shape
 import android.hardware.camera2.CameraManager
 import android.os.Bundle
+import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -16,20 +17,20 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.widthIn
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Send
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
@@ -59,6 +60,14 @@ import com.slc.morse.R
 import com.slc.morse.ui.theme.MorseLanternTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CornerSize
+import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.outlined.MoreVert
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.res.painterResource
+import com.slc.morse.domain.entities.Message
 
 class LanternActivity: ComponentActivity() {
 
@@ -78,7 +87,14 @@ class LanternActivity: ComponentActivity() {
                                 titleContentColor = MaterialTheme.colorScheme.onSurface,
                             ),
                             title = {
-                                Text("Morse Light")
+                                Text("Morse Light", modifier = Modifier.padding(start = 10.dp))
+                            },
+                            navigationIcon = {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_morse),
+                                    contentDescription = "topBarIcon",
+                                    modifier = Modifier.size(35.dp).padding(top = 5.dp, start = 10.dp)
+                                )
                             }
                         )
                     },
@@ -96,57 +112,34 @@ class LanternActivity: ComponentActivity() {
 fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modifier: Modifier) {
     //val lanternOn: Boolean by viewModel.lanternOn.observeAsState(initial = false)
     val code: String by viewModel.code.observeAsState(initial = "")
-    var text by remember { mutableStateOf("") }
+    val messages: List<Message> by viewModel.messages.observeAsState(initial = emptyList())
     var loading by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
     var currentProgress by remember { mutableStateOf(0f) }
 
     ConstraintLayout(modifier.fillMaxSize()) {
-        val (dotLottie, textTitle, textCode, progressIndicator, chatBox) = createRefs()
+        val (chatList, chatBox) = createRefs()
 
-        /*Text(
-            text = "Morse",
-            style = TextStyle(color = Color.White, fontSize = 30.sp),
-            modifier = Modifier.constrainAs(textTitle) {
-                top.linkTo(parent.top, margin = 20.dp)
-                start.linkTo(parent.start, margin = 20.dp)
-                end.linkTo(parent.end, margin = 20.dp)
-            }
-        )*/
-
-        /*Text(
-            text = code,
-            style = TextStyle(color = Color.White, fontSize = 50.sp),
-            modifier = Modifier.constrainAs(textCode) {
-                top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
-                start.linkTo(parent.start, margin = 20.dp)
-                end.linkTo(parent.end, margin = 20.dp)
-            }
-        )*/
-
-        /*DotLottie(
-            modifier = Modifier.constrainAs(dotLottie) {
-                top.linkTo(parent.top)
-                start.linkTo(parent.start)
-            }
-        )*/
-
-        LinearDeterminateIndicator(
-            loading = loading,
-            currentProgress = currentProgress,
-            modifier = modifier
-                .padding(horizontal = 20.dp)
-                .constrainAs(progressIndicator) {
-                    bottom.linkTo(chatBox.top, margin = 10.dp)
-                    start.linkTo(parent.start,)
+        LazyColumn(
+            modifier = Modifier
+                .fillMaxSize()
+                .constrainAs(chatList) {
+                    top.linkTo(parent.top, margin = 100.dp)
+                    bottom.linkTo(chatBox.top)
+                    start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
-        )
+        ) {
+            items(items = messages) { message ->
+                MessageItem(
+                    message = message
+                )
+            }
+        }
 
         ChatBox(
             onSendChatClickListener = {
-                viewModel.start(text, cameraManager)
+                viewModel.start(it, cameraManager)
                 loading = true
                 scope.launch {
                     loadProgress { progress ->
@@ -163,47 +156,6 @@ fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modif
                     end.linkTo(parent.end)
                 }
         )
-    }
-}
-
-@Composable
-fun DotLottie(modifier: Modifier) {
-    val preloaderLottieComposition by rememberLottieComposition(
-        LottieCompositionSpec.RawRes(
-            R.raw.radar_white
-        )
-    )
-
-    val preloaderProgress by animateLottieCompositionAsState(
-        preloaderLottieComposition,
-        iterations = LottieConstants.IterateForever,
-        isPlaying = true
-    )
-
-    LottieAnimation(
-        composition = preloaderLottieComposition,
-        progress = preloaderProgress,
-        modifier = modifier.width(100.dp).height(100.dp)
-    )
-}
-
-@Composable
-fun LinearDeterminateIndicator(modifier: Modifier, loading: Boolean, currentProgress: Float) {
-
-    Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier.fillMaxWidth()
-    ) {
-        if (loading) {
-            LinearProgressIndicator(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(20.dp)),
-                progress = currentProgress,
-                color = Color.White,
-            )
-        }
     }
 }
 
@@ -269,6 +221,91 @@ fun ChatBox(
         }
     }
 }
+
+@Composable
+fun MessageItem(message: Message) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 8.dp, vertical = 4.dp),
+        horizontalAlignment = when { // 2
+            message.isMine -> Alignment.End
+            else -> Alignment.Start
+        },
+    ) {
+        Card(
+            modifier = Modifier.widthIn(max = 340.dp),
+            shape = cardShapeFor(message),
+            colors = CardDefaults.cardColors(
+                containerColor = MaterialTheme.colorScheme.onBackground,
+                contentColor = MaterialTheme.colorScheme.secondary
+            )
+        ) {
+            Text(
+                modifier = Modifier.padding(8.dp),
+                text = message.text,
+                color = when {
+                    message.isMine -> MaterialTheme.colorScheme.onPrimary
+                    else -> MaterialTheme.colorScheme.onSecondary
+                },
+            )
+        }
+    }
+}
+
+@Composable
+fun cardShapeFor(message: Message): RoundedCornerShape {
+    val roundedCorners = RoundedCornerShape(16.dp)
+    return when {
+        message.isMine -> roundedCorners.copy(bottomEnd = CornerSize(0))
+        else -> roundedCorners.copy(bottomStart = CornerSize(0))
+    }
+}
+
+@Composable
+fun DotLottie(modifier: Modifier) {
+    val preloaderLottieComposition by rememberLottieComposition(
+        LottieCompositionSpec.RawRes(
+            R.raw.radar_white
+        )
+    )
+
+    val preloaderProgress by animateLottieCompositionAsState(
+        preloaderLottieComposition,
+        iterations = LottieConstants.IterateForever,
+        isPlaying = true
+    )
+
+    LottieAnimation(
+        composition = preloaderLottieComposition,
+        progress = preloaderProgress,
+        modifier = modifier
+            .width(100.dp)
+            .height(100.dp)
+    )
+}
+
+@Composable
+fun LinearDeterminateIndicator(modifier: Modifier, loading: Boolean, currentProgress: Float) {
+
+    Column(
+        verticalArrangement = Arrangement.spacedBy(12.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        if (loading) {
+            LinearProgressIndicator(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(20.dp)),
+                progress = currentProgress,
+                color = Color.White,
+            )
+        }
+    }
+}
+
+
 
 @Preview(showBackground = true)
 @Composable
