@@ -27,11 +27,14 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TextFieldDefaults
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
@@ -42,13 +45,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.LottieAnimation
 import com.airbnb.lottie.compose.LottieCompositionSpec
@@ -57,7 +57,6 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.slc.morse.R
 import com.slc.morse.ui.theme.MorseLanternTheme
-import com.slc.morse.ui.theme.PurpleGrey80
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -66,11 +65,23 @@ class LanternActivity: ComponentActivity() {
     private lateinit var viewModel: LanternViewModel
     private lateinit var cameraManager: CameraManager
 
+    @OptIn(ExperimentalMaterial3Api::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MorseLanternTheme {
                 Scaffold(
+                    topBar = {
+                        TopAppBar(
+                            colors = TopAppBarDefaults.topAppBarColors(
+                                containerColor = MaterialTheme.colorScheme.primary,
+                                titleContentColor = MaterialTheme.colorScheme.onSurface,
+                            ),
+                            title = {
+                                Text("Morse Light")
+                            }
+                        )
+                    },
                 ) { innerPadding ->
                     BodyContent(viewModel, cameraManager, modifier = Modifier.padding(innerPadding))
                 }
@@ -91,53 +102,35 @@ fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modif
     var currentProgress by remember { mutableStateOf(0f) }
 
     ConstraintLayout(modifier.fillMaxSize()) {
-        val (textTitle, dotLottie, textCode, progressIndicator, editText, btnStart) = createRefs()
+        val (dotLottie, textTitle, textCode, progressIndicator, chatBox) = createRefs()
 
-        Text(
-            text = "",
+        /*Text(
+            text = "Morse",
             style = TextStyle(color = Color.White, fontSize = 30.sp),
             modifier = Modifier.constrainAs(textTitle) {
                 top.linkTo(parent.top, margin = 20.dp)
                 start.linkTo(parent.start, margin = 20.dp)
                 end.linkTo(parent.end, margin = 20.dp)
             }
-        )
+        )*/
 
-        Text(
+        /*Text(
             text = code,
             style = TextStyle(color = Color.White, fontSize = 50.sp),
             modifier = Modifier.constrainAs(textCode) {
-                top.linkTo(textTitle.bottom)
-                bottom.linkTo(btnStart.top)
+                top.linkTo(parent.top)
+                bottom.linkTo(parent.bottom)
                 start.linkTo(parent.start, margin = 20.dp)
                 end.linkTo(parent.end, margin = 20.dp)
             }
-        )
+        )*/
 
-        DotLottie(
+        /*DotLottie(
             modifier = Modifier.constrainAs(dotLottie) {
                 top.linkTo(parent.top)
-                bottom.linkTo(parent.bottom)
                 start.linkTo(parent.start)
-                end.linkTo(parent.end)
             }
-        )
-
-        ActionButton(modifier = modifier.constrainAs(btnStart) {
-            top.linkTo(parent.top)
-            bottom.linkTo(parent.bottom)
-            start.linkTo(parent.start)
-            end.linkTo(parent.end)
-        }) {
-            viewModel.start(text, cameraManager)
-            loading = true
-            scope.launch {
-                loadProgress { progress ->
-                    currentProgress = progress
-                }
-                loading = false // Reset loading when the coroutine finishes
-            }
-        }
+        )*/
 
         LinearDeterminateIndicator(
             loading = loading,
@@ -145,56 +138,31 @@ fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modif
             modifier = modifier
                 .padding(horizontal = 20.dp)
                 .constrainAs(progressIndicator) {
-                    bottom.linkTo(editText.top, margin = 10.dp)
+                    bottom.linkTo(chatBox.top, margin = 10.dp)
                     start.linkTo(parent.start,)
                     end.linkTo(parent.end)
                 }
         )
 
-        /*TextField(
-            value = text,
-            placeholder = { Text(text = "")},
-            singleLine = false,
-            maxLines = 5,
-            onValueChange = {
-                text = it
+        ChatBox(
+            onSendChatClickListener = {
+                viewModel.start(text, cameraManager)
+                loading = true
+                scope.launch {
+                    loadProgress { progress ->
+                        currentProgress = progress
+                    }
+                    loading = false
+                }
             },
             modifier = Modifier
-                .fillMaxWidth().height(200.dp).padding(all = 20.dp)
-                .constrainAs(editText) {
-                    bottom.linkTo(parent.bottom)
-                    start.linkTo(parent.start)
-                    end.linkTo(parent.end)
-                },
-        )*/
-        ChatBox(
-            onSendChatClickListener = {},
-            modifier = Modifier
                 .fillMaxWidth()
-                .constrainAs(editText) {
+                .constrainAs(chatBox) {
                     bottom.linkTo(parent.bottom)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
         )
-    }
-}
-
-@Composable
-fun ActionButton(modifier: Modifier, onPressed:() -> Unit) {
-    Surface(
-        color = Color.White,
-        shape = CircleShape,
-        modifier = modifier
-            .width(75.dp)
-            .height(75.dp)
-            .clickable(
-                indication = null,
-                interactionSource = remember { MutableInteractionSource() }) {
-                onPressed()
-            }
-    ) {
-        Icon(Icons.Default.PlayArrow, contentDescription = "play", tint = Color.Black, modifier = Modifier.padding(20.dp))
     }
 }
 
@@ -215,7 +183,7 @@ fun DotLottie(modifier: Modifier) {
     LottieAnimation(
         composition = preloaderLottieComposition,
         progress = preloaderProgress,
-        modifier = modifier.scale(0.5f)
+        modifier = modifier.width(100.dp).height(100.dp)
     )
 }
 
