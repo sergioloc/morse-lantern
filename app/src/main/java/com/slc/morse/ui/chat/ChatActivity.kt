@@ -57,7 +57,9 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.vectorResource
 import com.slc.morse.domain.entities.Message
 
 class LanternActivity: ComponentActivity() {
@@ -101,7 +103,7 @@ class LanternActivity: ComponentActivity() {
 
 @Composable
 fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier: Modifier) {
-    //val lanternOn: Boolean by viewModel.lanternOn.observeAsState(initial = false)
+    val lightOn: Boolean by viewModel.lightOn.observeAsState(initial = false)
     val countdown: Float by viewModel.countdown.observeAsState(initial = 0f)
     val loading: Boolean by viewModel.loading.observeAsState(initial = false)
     val messages: List<Message> by viewModel.messages.observeAsState(initial = emptyList())
@@ -138,13 +140,12 @@ fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier
         )
 
         ChatBox(
-            onSendChatClickListener = {
+            lightOn = lightOn,
+            onStartClickListener = {
                 viewModel.start(it, cameraManager)
-                /*scope.launch {
-                    loadProgress { progress ->
-                        currentProgress = progress
-                    }
-                }*/
+            },
+            onStopClickListener = {
+                viewModel.stop()
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -160,8 +161,10 @@ fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChatBox(
-    onSendChatClickListener: (String) -> Unit,
-    modifier: Modifier
+    lightOn: Boolean,
+    onStartClickListener: (String) -> Unit,
+    onStopClickListener: () -> Unit,
+    modifier: Modifier,
 ) {
     var chatBoxValue by remember { mutableStateOf(TextFieldValue("")) }
     Row(modifier = modifier.padding(10.dp)) {
@@ -187,10 +190,15 @@ fun ChatBox(
 
         IconButton(
             onClick = {
-                val msg = chatBoxValue.text
-                if (msg.isBlank()) return@IconButton
-                onSendChatClickListener(chatBoxValue.text)
-                chatBoxValue = TextFieldValue("")
+                if (lightOn) {
+                    onStopClickListener()
+                }
+                else {
+                    val msg = chatBoxValue.text
+                    if (msg.isBlank()) return@IconButton
+                    onStartClickListener(chatBoxValue.text)
+                    chatBoxValue = TextFieldValue("")
+                }
             },
             modifier = Modifier
                 .clip(CircleShape)
@@ -200,7 +208,10 @@ fun ChatBox(
                 .align(Alignment.CenterVertically)
         ) {
             Icon(
-                imageVector = Icons.Filled.Send,
+                imageVector = when {
+                    lightOn -> ImageVector.vectorResource(R.drawable.ic_stop)
+                    else -> Icons.Filled.Send
+                },
                 contentDescription = "Send",
                 tint = Color.DarkGray,
                 modifier = Modifier

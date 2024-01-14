@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 
 class ChatViewModel: ViewModel() {
 
-    private val _lanternOn = MutableLiveData<Boolean>()
-    val lanternOn: LiveData<Boolean> = _lanternOn
+    private val _lightOn = MutableLiveData<Boolean>()
+    val lightOn: LiveData<Boolean> = _lightOn
 
     private val _code = MutableLiveData<String>()
     val code: LiveData<String> = _code
@@ -31,13 +31,14 @@ class ChatViewModel: ViewModel() {
     private val _messages = MutableLiveData<List<Message>>(emptyList())
     val messages: LiveData<List<Message>> get() = _messages
 
-    fun start(text: String, cameraManager: CameraManager) {
+    private var _run = false
 
+    fun start(text: String, cameraManager: CameraManager) {
+        _run = true
         _messages.value = addMessage(text, isMine = true)
         _loading.value = true
-        _lanternOn.value = true
+        _lightOn.value = true
 
-        val cameraId = cameraManager.cameraIdList[0]
         val characters = ArrayList<Character>()
 
         for (c: Char in text) {
@@ -67,36 +68,59 @@ class ChatViewModel: ViewModel() {
             }
         }
 
-        viewModelScope.launch {
-            for (character: Character in characters) {
-                _code.value = character.code
-                for (symbol: Symbol in character.symbols) {
-                    when (symbol) {
-                        Symbol.DOT -> {
-                            //cameraManager.setTorchMode(cameraId, true)
-                            delay(500)
-                            //cameraManager.setTorchMode(cameraId, false)
-                        }
-                        Symbol.LINE -> {
-                            //cameraManager.setTorchMode(cameraId, true)
-                            delay(2000)
-                            //cameraManager.setTorchMode(cameraId, false)
-                        }
-                        Symbol.SPACE -> {
-                            delay(2000)
-                        }
-                        Symbol.SLASH -> {
-                            delay(0)
-                        }
-                    }
-                    delay(1000)
-                }
-            }
-            //cameraManager.setTorchMode(cameraId, false)
-            _code.value = ""
-            _lanternOn.value = false
-            _loading.value = false
+        if (cameraManager.cameraIdList.isEmpty()) {
+            return
         }
+        else {
+            val cameraId = cameraManager.cameraIdList[0]
+
+            viewModelScope.launch {
+                for (character: Character in characters) {
+                    if (!_run) {
+                        cameraManager.setTorchMode(cameraId, false)
+                        break
+                    }
+                    _code.value = character.code
+                    for (symbol: Symbol in character.symbols) {
+                        if (!_run) {
+                            cameraManager.setTorchMode(cameraId, false)
+                            break
+                        }
+                        when (symbol) {
+                            Symbol.DOT -> {
+                                cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
+                                delay(500)
+                                cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
+                            }
+                            Symbol.LINE -> {
+                                cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
+                                delay(2000)
+                                cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
+                            }
+                            Symbol.SPACE -> {
+                                delay(2000)
+                            }
+                            Symbol.SLASH -> {
+                                delay(0)
+                            }
+                        }
+                        delay(1000)
+                    }
+                }
+                cameraManager.setTorchMode(cameraId, false)
+                _code.value = ""
+                _lightOn.value = false
+                _loading.value = false
+            }
+        }
+    }
+
+    fun stop() {
+        _run = false
+    }
+
+    private fun getBoolean(run: Boolean, value: Boolean): Boolean {
+        return run && value
     }
 
     private fun addMessage(text: String, isMine: Boolean): List<Message> {
