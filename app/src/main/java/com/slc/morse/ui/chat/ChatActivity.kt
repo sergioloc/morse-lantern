@@ -173,7 +173,8 @@ fun ChatBox(
         TextField(
             value = chatBoxValue,
             onValueChange = { newText ->
-                chatBoxValue = newText
+                if (!lightOn)
+                    chatBoxValue = newText
             },
             modifier = Modifier
                 .weight(1f),
@@ -186,7 +187,7 @@ fun ChatBox(
             ),
             placeholder = {
                 Text(text = "Type something")
-            }
+            },
         )
 
         Spacer(modifier = Modifier.width(10.dp))
