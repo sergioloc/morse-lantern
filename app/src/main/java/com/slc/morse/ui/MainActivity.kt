@@ -3,7 +3,7 @@ package com.slc.morse.ui
 import android.content.Intent
 import android.os.Bundle
 import androidx.activity.ComponentActivity
-import com.slc.morse.ui.lantern.LanternActivity
+import com.slc.morse.ui.chat.LanternActivity
 
 class MainActivity : ComponentActivity() {
 

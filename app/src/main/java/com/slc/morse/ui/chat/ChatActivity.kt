@@ -1,15 +1,12 @@
-package com.slc.morse.ui.lantern
+package com.slc.morse.ui.chat
 
 import android.content.Context
-import android.graphics.drawable.shapes.Shape
 import android.hardware.camera2.CameraManager
 import android.os.Bundle
-import android.widget.Space
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -41,14 +38,12 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.input.TextFieldValue
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.constraintlayout.compose.ConstraintLayout
 import com.airbnb.lottie.compose.LottieAnimation
@@ -58,12 +53,8 @@ import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.slc.morse.R
 import com.slc.morse.ui.theme.MorseLanternTheme
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CornerSize
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.outlined.MoreVert
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.ui.res.painterResource
@@ -71,7 +62,7 @@ import com.slc.morse.domain.entities.Message
 
 class LanternActivity: ComponentActivity() {
 
-    private lateinit var viewModel: LanternViewModel
+    private lateinit var viewModel: ChatViewModel
     private lateinit var cameraManager: CameraManager
 
     @OptIn(ExperimentalMaterial3Api::class)
@@ -103,22 +94,20 @@ class LanternActivity: ComponentActivity() {
                 }
             }
         }
-        viewModel = LanternViewModel()
+        viewModel = ChatViewModel()
         cameraManager = getSystemService(Context.CAMERA_SERVICE) as CameraManager
     }
 }
 
 @Composable
-fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modifier: Modifier) {
+fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier: Modifier) {
     //val lanternOn: Boolean by viewModel.lanternOn.observeAsState(initial = false)
-    val code: String by viewModel.code.observeAsState(initial = "")
+    val countdown: Float by viewModel.countdown.observeAsState(initial = 0f)
+    val loading: Boolean by viewModel.loading.observeAsState(initial = false)
     val messages: List<Message> by viewModel.messages.observeAsState(initial = emptyList())
-    var loading by remember { mutableStateOf(false) }
-    val scope = rememberCoroutineScope()
-    var currentProgress by remember { mutableStateOf(0f) }
 
     ConstraintLayout(modifier.fillMaxSize()) {
-        val (chatList, chatBox) = createRefs()
+        val (chatList, progressBar, chatBox) = createRefs()
 
         LazyColumn(
             modifier = Modifier
@@ -137,16 +126,25 @@ fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modif
             }
         }
 
+        LinearDeterminateIndicator(
+            modifier = modifier
+                .constrainAs(progressBar) {
+                    bottom.linkTo(chatBox.top)
+                    start.linkTo(parent.start, margin = 20.dp)
+                    end.linkTo(parent.end, margin = 20.dp)
+            },
+            loading,
+            countdown
+        )
+
         ChatBox(
             onSendChatClickListener = {
                 viewModel.start(it, cameraManager)
-                loading = true
-                scope.launch {
+                /*scope.launch {
                     loadProgress { progress ->
                         currentProgress = progress
                     }
-                    loading = false
-                }
+                }*/
             },
             modifier = Modifier
                 .fillMaxWidth()
@@ -156,15 +154,6 @@ fun BodyContent(viewModel: LanternViewModel, cameraManager: CameraManager, modif
                     end.linkTo(parent.end)
                 }
         )
-    }
-}
-
-
-/** Iterate the progress value */
-suspend fun loadProgress(updateProgress: (Float) -> Unit) {
-    for (i in 1..100) {
-        updateProgress(i.toFloat() / 100)
-        delay(100)
     }
 }
 
@@ -287,9 +276,8 @@ fun DotLottie(modifier: Modifier) {
 
 @Composable
 fun LinearDeterminateIndicator(modifier: Modifier, loading: Boolean, currentProgress: Float) {
-
     Column(
-        verticalArrangement = Arrangement.spacedBy(12.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier.fillMaxWidth()
     ) {
@@ -303,12 +291,4 @@ fun LinearDeterminateIndicator(modifier: Modifier, loading: Boolean, currentProg
             )
         }
     }
-}
-
-
-
-@Preview(showBackground = true)
-@Composable
-fun DefaultPreview() {
-    LanternActivity()
 }
