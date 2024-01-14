@@ -62,7 +62,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import com.slc.morse.domain.entities.Message
 
-class LanternActivity: ComponentActivity() {
+class ChatActivity: ComponentActivity() {
 
     private lateinit var viewModel: ChatViewModel
     private lateinit var cameraManager: CameraManager
@@ -86,7 +86,9 @@ class LanternActivity: ComponentActivity() {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_morse),
                                     contentDescription = "topBarIcon",
-                                    modifier = Modifier.size(35.dp).padding(top = 5.dp, start = 10.dp)
+                                    modifier = Modifier
+                                        .size(35.dp)
+                                        .padding(top = 5.dp, start = 10.dp)
                                 )
                             }
                         )
@@ -112,10 +114,10 @@ fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier
         val (chatList, progressBar, chatBox) = createRefs()
 
         LazyColumn(
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxSize()
                 .constrainAs(chatList) {
-                    top.linkTo(parent.top, margin = 100.dp)
+                    top.linkTo(parent.top, margin = 20.dp)
                     bottom.linkTo(chatBox.top)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
@@ -147,7 +149,7 @@ fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier
             onStopClickListener = {
                 viewModel.stop()
             },
-            modifier = Modifier
+            modifier = modifier
                 .fillMaxWidth()
                 .constrainAs(chatBox) {
                     bottom.linkTo(parent.bottom)
@@ -179,7 +181,8 @@ fun ChatBox(
             colors = TextFieldDefaults.textFieldColors(
                 focusedIndicatorColor = Color.Transparent,
                 unfocusedIndicatorColor = Color.Transparent,
-                disabledIndicatorColor = Color.Transparent
+                disabledIndicatorColor = Color.Transparent,
+                cursorColor = Color.White
             ),
             placeholder = {
                 Text(text = "Type something")
@@ -227,7 +230,7 @@ fun MessageItem(message: Message) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(horizontal = 8.dp, vertical = 4.dp),
+            .padding(horizontal = 10.dp, vertical = 4.dp),
         horizontalAlignment = when { // 2
             message.isMine -> Alignment.End
             else -> Alignment.Start

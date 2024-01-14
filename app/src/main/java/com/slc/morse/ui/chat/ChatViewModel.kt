@@ -6,6 +6,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.slc.morse.data.Dictionary
+import com.slc.morse.data.Speed
 import com.slc.morse.domain.entities.Message
 import com.slc.morse.domain.entities.Symbol
 import com.slc.morse.domain.entities.Character
@@ -36,13 +37,15 @@ class ChatViewModel: ViewModel() {
     fun start(text: String, cameraManager: CameraManager) {
         _run = true
         _messages.value = addMessage(text, isMine = true)
-        _loading.value = true
+        //_loading.value = true
         _lightOn.value = true
 
         val characters = ArrayList<Character>()
 
-        for (c: Char in text) {
+        for (i in text.indices) {
+            val c = text[i]
             var isSpace = false
+
             if (c == ' ') {
                 characters.add(Character(" ", listOf(Symbol.SPACE)))
                 isSpace = true
@@ -51,20 +54,23 @@ class ChatViewModel: ViewModel() {
             } else if (c.toString().isNumber()) {
                 Dictionary.numbers[c.toString()]?.let { characters.add(it) }
             }
-            if (text.last() != c && !isSpace) {
+            if (i < text.length-1 && !isSpace && (i+1 < text.length && text[i+1] != ' ')) {
                 characters.add(Character("/", listOf(Symbol.SLASH)))
             }
         }
 
         viewModelScope.launch {
             val symbols = getAllSymbols(characters)
-            _messages.value = addMessage(symbolsToText(symbols), isMine = false)
-            val countdown = getMessageTime(symbols)
-            var timeLeft = countdown
-            while (timeLeft > 0) {
-                _countdown.value = timeLeft / countdown.toFloat()
-                delay(100)
-                timeLeft -= 100
+            val message = symbolsToText(symbols)
+            if (message.isNotEmpty()) {
+                _messages.value = addMessage(message, isMine = false)
+                /*val countdown = getMessageTime(symbols)
+                var timeLeft = countdown
+                while (timeLeft > 0) {
+                    _countdown.value = timeLeft / countdown.toFloat()
+                    delay(100)
+                    timeLeft -= 100
+                }*/
             }
         }
 
@@ -77,34 +83,38 @@ class ChatViewModel: ViewModel() {
             viewModelScope.launch {
                 for (character: Character in characters) {
                     if (!_run) {
+                        _loading.value = false
+                        _lightOn.value = false
                         cameraManager.setTorchMode(cameraId, false)
                         break
                     }
                     _code.value = character.code
                     for (symbol: Symbol in character.symbols) {
                         if (!_run) {
+                            _loading.value = false
+                            _lightOn.value = false
                             cameraManager.setTorchMode(cameraId, false)
                             break
                         }
                         when (symbol) {
                             Symbol.DOT -> {
                                 cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
-                                delay(500)
+                                delay(Speed.DOT)
                                 cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
                             }
                             Symbol.LINE -> {
                                 cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
-                                delay(2000)
+                                delay(Speed.LINE)
                                 cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
                             }
                             Symbol.SPACE -> {
-                                delay(2000)
+                                delay(Speed.SPACE)
                             }
                             Symbol.SLASH -> {
-                                delay(0)
+                                delay(Speed.SLASH)
                             }
                         }
-                        delay(1000)
+                        delay(Speed.WAIT)
                     }
                 }
                 cameraManager.setTorchMode(cameraId, false)
