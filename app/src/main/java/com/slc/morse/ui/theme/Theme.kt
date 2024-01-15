@@ -30,7 +30,7 @@ private val LightColorScheme = lightColorScheme(
 )
 
 @Composable
-fun MorseLanternTheme(
+fun MorseTheme(
     darkTheme: Boolean = true, //isSystemInDarkTheme(),
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = false,

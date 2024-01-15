@@ -12,7 +12,7 @@ android {
         minSdk = 24
         targetSdk = 34
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         vectorDrawables {
@@ -54,7 +54,7 @@ dependencies {
     implementation("androidx.core:core-ktx:1.12.0")
     implementation("androidx.activity:activity-compose:1.8.2")
     implementation("androidx.constraintlayout:constraintlayout-compose:1.0.1")
-    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.6.2")
+    implementation("androidx.lifecycle:lifecycle-runtime-ktx:2.7.0")
     implementation("androidx.compose.runtime:runtime-livedata:1.5.4")
     implementation("androidx.compose.ui:ui")
     implementation("androidx.compose.ui:ui-graphics")

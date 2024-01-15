@@ -52,15 +52,18 @@ import com.airbnb.lottie.compose.LottieConstants
 import com.airbnb.lottie.compose.animateLottieCompositionAsState
 import com.airbnb.lottie.compose.rememberLottieComposition
 import com.slc.morse.R
-import com.slc.morse.ui.theme.MorseLanternTheme
+import com.slc.morse.ui.theme.MorseTheme
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CornerSize
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import com.slc.morse.domain.entities.Message
+import kotlinx.coroutines.launch
 
 class ChatActivity: ComponentActivity() {
 
@@ -71,7 +74,7 @@ class ChatActivity: ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MorseLanternTheme {
+            MorseTheme {
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -109,16 +112,19 @@ fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier
     val countdown: Float by viewModel.countdown.observeAsState(initial = 0f)
     val loading: Boolean by viewModel.loading.observeAsState(initial = false)
     val messages: List<Message> by viewModel.messages.observeAsState(initial = emptyList())
+    val listState = rememberLazyListState()
+    val coroutineScope = rememberCoroutineScope()
 
     ConstraintLayout(modifier.fillMaxSize()) {
         val (chatList, progressBar, chatBox) = createRefs()
 
         LazyColumn(
+            state = listState,
             modifier = modifier
                 .fillMaxSize()
                 .constrainAs(chatList) {
                     top.linkTo(parent.top, margin = 20.dp)
-                    bottom.linkTo(chatBox.top)
+                    bottom.linkTo(chatBox.top, margin = 10.dp)
                     start.linkTo(parent.start)
                     end.linkTo(parent.end)
                 }
@@ -145,6 +151,10 @@ fun BodyContent(viewModel: ChatViewModel, cameraManager: CameraManager, modifier
             lightOn = lightOn,
             onStartClickListener = {
                 viewModel.start(it, cameraManager)
+                coroutineScope.launch {
+                    // Animate scroll to the 10th item
+                    listState.animateScrollToItem(index = messages.size)
+                }
             },
             onStopClickListener = {
                 viewModel.stop()

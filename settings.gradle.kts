@@ -13,6 +13,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Morse Lantern"
+rootProject.name = "Morse"
 include(":app")
  
