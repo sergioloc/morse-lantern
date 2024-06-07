@@ -84,8 +84,8 @@ class ChatActivity: ComponentActivity() {
                             ),
                             title = {
                                 Text("Morse Light", modifier = Modifier.padding(start = 10.dp))
-                            },
-                            navigationIcon = {
+                            }
+                            /*navigationIcon = {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_morse),
                                     contentDescription = "topBarIcon",
@@ -93,7 +93,7 @@ class ChatActivity: ComponentActivity() {
                                         .size(35.dp)
                                         .padding(top = 5.dp, start = 10.dp)
                                 )
-                            }
+                            }*/
                         )
                     },
                 ) { innerPadding ->
