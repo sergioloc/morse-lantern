@@ -1,6 +1,7 @@
 package com.slc.morse.ui.chat
 
 import android.hardware.camera2.CameraManager
+import android.util.Log
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
@@ -81,43 +82,47 @@ class ChatViewModel: ViewModel() {
             val cameraId = cameraManager.cameraIdList[0]
 
             viewModelScope.launch {
-                for (character: Character in characters) {
-                    if (!_run) {
-                        _loading.value = false
-                        _lightOn.value = false
-                        cameraManager.setTorchMode(cameraId, false)
-                        break
-                    }
-                    _code.value = character.code
-                    for (symbol: Symbol in character.symbols) {
+                try {
+                    for (character: Character in characters) {
                         if (!_run) {
                             _loading.value = false
                             _lightOn.value = false
                             cameraManager.setTorchMode(cameraId, false)
                             break
                         }
-                        when (symbol) {
-                            Symbol.DOT -> {
-                                cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
-                                delay(Speed.DOT)
-                                cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
+                        _code.value = character.code
+                        for (symbol: Symbol in character.symbols) {
+                            if (!_run) {
+                                _loading.value = false
+                                _lightOn.value = false
+                                cameraManager.setTorchMode(cameraId, false)
+                                break
                             }
-                            Symbol.LINE -> {
-                                cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
-                                delay(Speed.LINE)
-                                cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
+                            when (symbol) {
+                                Symbol.DOT -> {
+                                    cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
+                                    delay(Speed.DOT)
+                                    cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
+                                }
+                                Symbol.LINE -> {
+                                    cameraManager.setTorchMode(cameraId, getBoolean(_run, true))
+                                    delay(Speed.LINE)
+                                    cameraManager.setTorchMode(cameraId, getBoolean(_run, false))
+                                }
+                                Symbol.SPACE -> {
+                                    delay(Speed.SPACE)
+                                }
+                                Symbol.SLASH -> {
+                                    delay(Speed.SLASH)
+                                }
                             }
-                            Symbol.SPACE -> {
-                                delay(Speed.SPACE)
-                            }
-                            Symbol.SLASH -> {
-                                delay(Speed.SLASH)
-                            }
+                            delay(Speed.WAIT)
                         }
-                        delay(Speed.WAIT)
                     }
+                    cameraManager.setTorchMode(cameraId, false)
+                } catch (e: Exception) {
+                    Log.e("ChatViewModel", "Unable to use camera torch")
                 }
-                cameraManager.setTorchMode(cameraId, false)
                 _code.value = ""
                 _lightOn.value = false
                 _loading.value = false
